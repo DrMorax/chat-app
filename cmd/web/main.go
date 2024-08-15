@@ -20,6 +20,7 @@ type application struct {
 	errorLog       *log.Logger
 	sessionManager *scs.SessionManager
 	users          models.UserModelInterface
+	rooms          models.RoomModelInterface
 }
 
 func main() {
@@ -47,6 +48,7 @@ func main() {
 		errorLog:       errorLog,
 		infoLog:        infoLog,
 		users:          &models.UserModel{DB: db},
+		rooms:          &models.RoomModel{DB: db},
 		sessionManager: sessionManager,
 	}
 

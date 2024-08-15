@@ -16,11 +16,15 @@ type Message struct {
 func main() {
 	app := fiber.New()
 
-	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
-		log.Println(c.Locals("allowed"))  // true
-		log.Println(c.Params("id"))       // 123
-		log.Println(c.Query("v"))         // 1.0
-		log.Println(c.Cookies("session")) // ""
+	app.Get("/", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("Hello, world")
+	})
+
+	app.Get("/ws/:id", websocket.New(func(ctx *websocket.Conn) {
+		log.Println(ctx.Locals("allowed"))  // true
+		log.Println(ctx.Params("id"))       // 123
+		log.Println(ctx.Query("v"))         // 1.0
+		log.Println(ctx.Cookies("session")) // ""
 
 		var (
 			mt  int
@@ -28,7 +32,7 @@ func main() {
 			err error
 		)
 		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
+			if mt, msg, err = ctx.ReadMessage(); err != nil {
 				log.Println("read:", err)
 				break
 			}
@@ -41,7 +45,7 @@ func main() {
 				break
 			}
 
-			if err = c.WriteMessage(mt, jsonResponse); err != nil {
+			if err = ctx.WriteMessage(mt, jsonResponse); err != nil {
 				log.Println("write:", err)
 				break
 			}
