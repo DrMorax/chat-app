@@ -1,6 +1,14 @@
 import { socketHandler } from "./socket.js";
+import { authenticator } from "./auth.js";
 
-const socket = new WebSocket("ws://localhost:3001/ws/123?v=1.0");
+document.getElementById("login-btn").addEventListener("click", () => {
+  authenticator.authenticate();
+});
+document.getElementById("register-btn").addEventListener("click", () => {
+  authenticator.register();
+});
+
+const socket = new WebSocket("ws://localhost:4000/feed");
 
 socket.onopen = () => {
   socketHandler.socketEvents.handleOpen();

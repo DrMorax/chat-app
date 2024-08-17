@@ -15,3 +15,7 @@
   border-color: rgb(255, 167, 167);
   color: white;
 }
+
+#messages {
+  font-size: 2rem;
+}

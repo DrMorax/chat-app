@@ -9,11 +9,14 @@ export const socketHandler = {
     },
 
     handleMessage: function (event) {
-      const message = JSON.parse(event.data);
-      console.log(`Received message: ${message.text}`);
+      const message = event.data;
+      console.log(`Received message: ${message}`);
+
+      // Clear existing messages before appending new ones TODO: Remove this line for production
+      document.getElementById("messages").innerHTML = "";
       document.getElementById(
         "messages"
-      ).innerHTML += `<p>From server: ${message.text}</p>`;
+      ).innerHTML += `<p>From server: ${message}</p>`;
     },
 
     handleClose: function () {
@@ -53,9 +56,6 @@ export const socketHandler = {
           return;
         }
         socket.send(input.value);
-        document.getElementById(
-          "messages"
-        ).innerHTML += `<p>From client: ${input.value}</p>`;
         input.value = "";
       },
       closeConnection: function (socket) {

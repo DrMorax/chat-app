@@ -68,7 +68,7 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
 
-	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 type LoginJSON struct {
@@ -129,7 +129,7 @@ func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {

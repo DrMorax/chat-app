@@ -1,56 +1,74 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
+	"io"
+	"net/http"
+	"time"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/websocket/v2"
+	"golang.org/x/net/websocket"
 )
 
-type Message struct {
-	Text string `json:"text"`
+type Server struct {
+	conns map[*websocket.Conn]bool
+}
+
+func NewServer() *Server {
+	return &Server{
+		conns: make(map[*websocket.Conn]bool),
+	}
+}
+
+func (s *Server) handleWS(ws *websocket.Conn) {
+	fmt.Println("New incoming connection from client: ", ws.RemoteAddr())
+
+	// TODO: For security reasons, make sure to have a mutex to avoid race conditions
+	s.conns[ws] = true
+
+	s.readLoop(ws)
+}
+
+func (s *Server) readLoop(ws *websocket.Conn) {
+	buf := make([]byte, 1024)
+
+	for {
+		n, err := ws.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			fmt.Println("read error: ", err)
+			continue
+		}
+		msg := buf[:n]
+
+		s.broadcast(msg)
+	}
+}
+
+func (s *Server) broadcast(b []byte) {
+	for ws := range s.conns {
+		go func(ws *websocket.Conn) {
+			if _, err := ws.Write(b); err != nil {
+				fmt.Println("Write error: ", err)
+			}
+		}(ws)
+	}
+}
+
+func (s *Server) liveFeed(ws *websocket.Conn) {
+	fmt.Println("New incoming connection from client to live feed: ", ws.RemoteAddr())
+
+	for {
+		payload := fmt.Sprintf("%d:%d:%d\n", time.Now().Hour(), time.Now().Minute(), time.Now().Second())
+		ws.Write([]byte(payload))
+		time.Sleep(time.Second * 1)
+	}
 }
 
 func main() {
-	app := fiber.New()
-
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Hello, world")
-	})
-
-	app.Get("/ws/:id", websocket.New(func(ctx *websocket.Conn) {
-		log.Println(ctx.Locals("allowed"))  // true
-		log.Println(ctx.Params("id"))       // 123
-		log.Println(ctx.Query("v"))         // 1.0
-		log.Println(ctx.Cookies("session")) // ""
-
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
-		for {
-			if mt, msg, err = ctx.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("recv: %s", msg)
-
-			response := Message{Text: fmt.Sprintf("I received your message %s", msg)}
-			jsonResponse, err := json.Marshal(response)
-			if err != nil {
-				log.Println("marshal:", err)
-				break
-			}
-
-			if err = ctx.WriteMessage(mt, jsonResponse); err != nil {
-				log.Println("write:", err)
-				break
-			}
-		}
-	}))
-
-	log.Fatal(app.Listen(":3001"))
+	server := NewServer()
+	http.Handle("/ws", websocket.Handler(server.handleWS))
+	http.Handle("/feed", websocket.Handler(server.liveFeed))
+	http.ListenAndServe(":4000", nil)
 }
