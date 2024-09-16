@@ -1,0 +1,21 @@
+.btn-sm {
+  font-size: 10px;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.primary-btn {
+  background-color: rgb(67, 80, 255);
+  border-color: rgb(184, 189, 255);
+  color: white;
+}
+
+.danger-btn {
+  background-color: red;
+  border-color: rgb(255, 167, 167);
+  color: white;
+}
+
+#messages {
+  font-size: 2rem;
+}

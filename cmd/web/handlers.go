@@ -1,16 +1,31 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 
 	"chatapp/internal/models"
 	"chatapp/internal/validator"
+	"chatapp/ui/components"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello"))
+	ctx := context.Background()
+
+	var buf bytes.Buffer
+
+	err := components.HomeTemplate().Render(ctx, &buf)
+	if err != nil {
+		http.Error(w, "Error rendering the HTML response", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	w.Write(buf.Bytes())
 }
 
 type SignupJSON struct {
@@ -132,20 +147,16 @@ func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
-// 	err := app.sessionManager.RenewToken(r.Context())
-// 	if err != nil {
-// 		app.serverError(w, err)
-// 		return
-// 	}
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+	err := app.sessionManager.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
-// 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
 
-// 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
+	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 
-// 	http.Redirect(w, r, "/", http.StatusSeeOther)
-// }
-
-// func ping(w http.ResponseWriter, r *http.Request) {
-// 	w.Write([]byte("OK"))
-// }
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}

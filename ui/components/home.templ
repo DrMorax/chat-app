@@ -1,0 +1,31 @@
+package components
+
+templ HomeTemplate() {
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <link rel="icon" type="image/x-icon" href="./static/images/favicon.png">
+            <link rel="stylesheet" href="./static/css/styles.css" />
+            <title>Websocket test</title>
+        </head>
+
+        <body>
+            <input
+            type="text"
+            id="message-input"
+            placeholder="Type your message here"
+            class="message-input"
+            />
+            <button id="send-message-btn" class="btn-sm primary-btn">
+            Send message
+            </button>
+            <button id="disconnect-btn" class="btn-sm danger-btn">Diconnect</button>
+            <div id="messages"></div>
+
+            <button id="login-btn">login</button>
+            <button id="register-btn">register</button>
+            <script type="module" src="./static/js/index.js"></script>
+        </body>
+    </html>
+}

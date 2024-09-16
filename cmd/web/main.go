@@ -10,9 +10,9 @@ import (
 
 	"chatapp/internal/models"
 
-	"github.com/alexedwards/scs/mysqlstore"
+	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 type application struct {
@@ -25,7 +25,7 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP Server Address")
-	dsn := flag.String("dsn", "web:pass@/chatapp?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "postgresql://postgres:abbas0780@localhost:5432/chatapp?sslmode=disable", "Postgresql database dsn")
 
 	flag.Parse()
 
@@ -40,7 +40,7 @@ func main() {
 	defer db.Close()
 
 	sessionManager := scs.New()
-	sessionManager.Store = mysqlstore.New(db)
+	sessionManager.Store = postgresstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.Secure = true
 
@@ -67,12 +67,16 @@ func main() {
 }
 
 func openDB(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
+
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
+
+	log.Printf("\nINFO\tConnected to database")
+
 	return db, nil
 }

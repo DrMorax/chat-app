@@ -36,7 +36,6 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data interf
 		return err
 	}
 
-	// Add necessary headers
 	for key, value := range headers {
 		w.Header()[key] = value
 	}

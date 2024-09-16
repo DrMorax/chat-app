@@ -36,7 +36,7 @@ type RoomModel struct {
 func (m *RoomModel) Latest(id int) ([]*Message, error) {
 	stmt := `SELECT message_id, user_id, room_id, message_txt, timestamp
 	FROM messages
-	Where id = ?
+	Where id = $1
 	ORDER By timestamp DESC
 	LIMIT 100`
 
